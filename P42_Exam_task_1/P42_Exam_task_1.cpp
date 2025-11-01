@@ -4,6 +4,52 @@
 
 using namespace std;
 
+char* getName(char* path) {
+    int count = 0;
+
+    for (size_t i = 0; i < strlen(path); i++)
+    {
+        if (path[i] == '\\') {
+            count++;
+        }
+    }
+
+    if (count == 0) {
+        char* name = new char[strlen(path) + 1];
+        for (size_t i = 0; i < strlen(path); i++)
+        {
+            if (path[i] == '.') {
+                name[i] = '\0';
+                break;
+            }
+            name[i] = path[i];
+        }
+        return name;
+    }
+    else
+    {
+        int count2 = 0;
+        char* name = new char[100];
+        
+        for (size_t i = 0; i < strlen(path); i++)
+        {
+            if(count2 == count) {
+                if (path[i] == '.') {
+                    name[i] = '\0';
+                    break;
+                }
+                name[i] = path[i];
+                continue;
+            }
+
+            if (path[i] == '\\') {
+                count2++;
+            }
+        }
+
+        return name;
+    }
+}
 
 
 void menu() {
@@ -21,15 +67,15 @@ void menu() {
 
 
 
-void lookDiskContent() {
-    struct _finddata_t myfileinfo;
-    char path[] = "C:\\";
-
-    long done = _findfirst("C:\\", &myfileinfo);
-
-    
-    cout << myfileinfo.name;
-}
+//void lookDiskContent() {
+//    struct _finddata_t myfileinfo;
+//    char path[] = "C:\\";
+//
+//    long done = _findfirst("C:\\", &myfileinfo);
+//
+//    
+//    cout << myfileinfo.name;
+//}
 
 
 
@@ -187,11 +233,97 @@ void renameFile() {
     delete[] newDirName;
 }
 
+
+
+void copyFolder() {}
+
+void copyFile() {
+    char* fileName = new char[200];
+
+    cout << "Enter the full path to the file: ";
+    cin >> fileName;
+
+    FILE* myfile;
+
+    if (fopen_s(&myfile, fileName, "r") != NULL) {
+        cout << "\nThis file could not be copied" << endl;
+    }
+    else
+    {
+        char* name = getName(fileName);
+        char* copy = new char[strlen(name) + 7];
+        strcpy_s(copy, strlen(name) + 1, name);
+        strcat_s(copy, strlen(name) + 15, " - copy.txt");
+
+        FILE* copyfile;
+
+        if (fopen_s(&copyfile, copy, "r") != NULL) {
+            if (fopen_s(&copyfile, copy, "w") != NULL) {
+                cout << "\nThis file could not be copied" << endl;
+            }
+            else
+            {
+                char* buffer = new char[200];
+
+                while (!feof(myfile)) {
+                    fgets(buffer, 200, myfile);
+                    fputs(buffer, copyfile);
+                }
+
+
+                fclose(myfile);
+                fclose(copyfile);
+
+                cout << "\nCopied succesfully" << endl;
+            }
+        }
+        else
+        {
+            fclose(copyfile);
+
+            cout << "Copy already exists. Do you want to rewrite it: " << endl;
+            cout << "0 - No" << endl;
+            cout << "1 - Yes" << endl;
+
+            int choice;
+            cin >> choice;
+
+            if (choice) {
+                if (fopen_s(&copyfile, copy, "w") != NULL) {
+                    cout << "\nThis file could not be copied" << endl;
+                }
+                else
+                {
+                    char* buffer = new char[200];
+
+                    while (!feof(myfile)) {
+                        fgets(buffer, 200, myfile);
+                        fputs(buffer, copyfile);
+                    }
+
+
+                    fclose(myfile);
+                    fclose(copyfile);
+
+                    cout << "\nCopied succesfully" << endl;
+                }
+            }
+            else
+            {
+                cout << "\nCanceled" << endl;
+            }
+        }
+    }
+    
+
+
+    delete[] fileName;
+}
+
+
 int main()
 {
         menu();
 
-        createFile();
-        renameFile();
-        //deleteFile();
+        copyFile();
 }
