@@ -1,10 +1,13 @@
 #include <iostream>
+#include <fstream>
 #include <io.h>
 #include <direct.h>
 
 using namespace std;
 
-char* getName(char* path) {
+
+
+char* getName(char* path, int& isTxt) {
     int count = 0;
 
     for (size_t i = 0; i < strlen(path); i++)
@@ -16,13 +19,21 @@ char* getName(char* path) {
 
     if (count == 0) {
         char* name = new char[strlen(path) + 1];
-        for (size_t i = 0; i < strlen(path); i++)
+        for (size_t i = 0; i <= strlen(path); i++)
         {
             if (path[i] == '.') {
                 name[i] = '\0';
+                isTxt += 1;
                 break;
             }
-            name[i] = path[i];
+
+            if (i == strlen(path)) {
+                name[i] = '\0';
+            }
+            else
+            {
+                name[i] = path[i];
+            }
         }
         return name;
     }
@@ -36,6 +47,7 @@ char* getName(char* path) {
             if(count2 == count) {
                 if (path[i] == '.') {
                     name[i] = '\0';
+                    isTxt += 1;
                     break;
                 }
                 name[i] = path[i];
@@ -50,6 +62,7 @@ char* getName(char* path) {
         return name;
     }
 }
+
 
 
 void menu() {
@@ -125,10 +138,8 @@ void createFile() {
         cin >> choice;
 
         if (choice) {
-            //fopen_s(&newFile, fileName, "w");
-            //cout << "\nFile rewrited" << endl;
             if (fopen_s(&newFile, fileName, "w") != NULL) {
-                cout << "\nThis file could not be created" << endl;
+                cout << "\nThis file could not be rewrited" << endl;
             }
             else
             {
@@ -145,6 +156,7 @@ void createFile() {
 
     delete[] fileName;
 }
+
 
 
 
@@ -166,7 +178,7 @@ void deleteFolder() {
 }
 
 void deleteFile() {
-    FILE* newFile;
+    //FILE* newFile;
     char* fileName = new char[100];
 
     cout << "\nEnter the full path to file you want to delete: ";
@@ -182,6 +194,7 @@ void deleteFile() {
 
     delete[] fileName;
 }
+
 
 
 
@@ -235,7 +248,11 @@ void renameFile() {
 
 
 
+
 void copyFolder() {}
+
+void moveFolder() {}
+
 
 void copyFile() {
     char* fileName = new char[200];
@@ -250,10 +267,18 @@ void copyFile() {
     }
     else
     {
-        char* name = getName(fileName);
+        int isTxt = 0;
+        char* name = getName(fileName, isTxt);
         char* copy = new char[strlen(name) + 7];
         strcpy_s(copy, strlen(name) + 1, name);
-        strcat_s(copy, strlen(name) + 15, " - copy.txt");
+
+        if(isTxt) {
+            strcat_s(copy, strlen(name) + 15, " - copy.txt");
+        }
+        else
+        {
+            strcat_s(copy, strlen(name) + 15, " - copy");
+        }
 
         FILE* copyfile;
 
@@ -275,6 +300,8 @@ void copyFile() {
                 fclose(copyfile);
 
                 cout << "\nCopied succesfully" << endl;
+
+                delete[] buffer;
             }
         }
         else
@@ -306,6 +333,8 @@ void copyFile() {
                     fclose(copyfile);
 
                     cout << "\nCopied succesfully" << endl;
+
+                    delete[] buffer;
                 }
             }
             else
@@ -320,10 +349,152 @@ void copyFile() {
     delete[] fileName;
 }
 
+void moveFile() {
+    char* fileName = new char[200];
+
+    cout << "Enter the full path to the file: ";
+    cin >> fileName;
+
+    FILE* myfile;
+    FILE* movedFile;
+
+    if (fopen_s(&myfile, fileName, "r") != NULL) {
+        cout << "\nThis file could not be moved" << endl;
+    }
+    else
+    {
+
+        int isTxt = 0;
+        char* name = getName(fileName, isTxt);
+
+        if (isTxt) {
+            strcat_s(name, strlen(name) + 5, ".txt");
+        }
+
+        char* path = new char[200];
+
+        cout << "Enter the full path to the folder where you want to move this file: ";
+        cin >> path;
+
+        if (strlen(path) != 3) {
+            strcat_s(path, strlen(path) + 2, "\\");
+            strcat_s(path, strlen(path) + strlen(name), name);
+        }
+        else
+        {
+            strcat_s(path, strlen(name) + 4, name);
+        }
+
+
+        if (fopen_s(&movedFile, path, "r") != NULL) {
+            
+            if (fopen_s(&movedFile, path, "w") != NULL) {
+                cout << "\nThis file could not be moved to this folder" << endl;
+            }
+            else
+            {
+                if(isTxt) {
+                    char* buffer = new char[200];
+
+                    while (!feof(myfile)) {
+                        fgets(buffer, 200, myfile);
+                        fputs(buffer, movedFile);
+                    }
+                }
+                
+
+                cout << "\nFile moved succesfully" << endl;
+                
+                fclose(myfile);
+                fclose(movedFile);
+                remove(fileName);
+            }
+        }
+        else
+        {
+            fclose(movedFile);
+
+            cout << "\nFile with that name already exist in this folder. Do you want to rewrite it?" << endl;
+            cout << "0 - No" << endl;
+            cout << "1 - Yes" << endl;
+
+            bool choice;
+            cin >> choice;
+
+            if (choice) {
+                if (fopen_s(&movedFile, path, "w") != NULL) {
+                    cout << "\nThis file could not be rewrited" << endl;
+                }
+                else
+                {
+                    if (isTxt) {
+                        char* buffer = new char[200];
+
+                        while (!feof(myfile)) {
+                            fgets(buffer, 200, myfile);
+                            fputs(buffer, movedFile);
+                        }
+                    }
+                    cout << "\nFile rewrited" << endl;
+                    
+                    fclose(myfile);
+                    fclose(movedFile);
+                    remove(fileName);
+                }
+            }
+            else
+            {
+                cout << "\nCanceled" << endl;
+                fclose(myfile);
+            }
+        }
+
+    }
+}
+
+
+
+
+void sizeOfFolder() {}
+
+void sizeOfFile() {
+    char* fileName = new char[200];
+
+    cout << "Enter the full path to the file: ";
+    cin >> fileName;
+
+    struct _finddata_t myfileinfo;
+    long findFile = _findfirst(fileName, &myfileinfo);
+
+    cout << "\nSize of this file: " << myfileinfo.size << " byte" << endl;
+}
+
+
+
+void findByMask() {
+    char* path = new char[200];
+
+    cout << "Enter the full path to the folder where you want to start searching: ";
+    cin >> path;
+
+    struct _finddata_t myfileinfo;
+
+    long done = _findfirst(path, &myfileinfo);
+
+    while (done != 1) {
+        cout << myfileinfo.name << endl;
+        done = _findnext(done, &myfileinfo);
+    }
+}
+
 
 int main()
 {
         menu();
 
-        copyFile();
+        //createFile();
+
+        sizeOfFolder();
+
+        
 }
