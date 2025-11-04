@@ -80,15 +80,7 @@ void menu() {
 
 
 
-//void lookDiskContent() {
-//    struct _finddata_t myfileinfo;
-//    char path[] = "C:\\";
-//
-//    long done = _findfirst("C:\\", &myfileinfo);
-//
-//    
-//    cout << myfileinfo.name;
-//}
+void lookDiskContent() {}
 
 
 
@@ -490,11 +482,188 @@ void findByMask() {
 
 int main()
 {
+    int choice = 1;
+    int choice2 = 1;
+    int choice3 = 1;
+
+    char pause;
+
+    while (choice != 0)
+    {
         menu();
 
-        //createFile();
+        cin >> choice;
+        cout << endl;
 
-        sizeOfFolder();
+        if (choice == 1) {
+            lookDiskContent();
+        }
+        else if (choice == 2)
+        {
+            cout << "What you want to create?" << endl;
+            cout << "1 - File" << endl;
+            cout << "2 - Folder" << endl;
 
-        
+            cout << "\n0 - Cancel" << endl;
+            cin >> choice2;
+            cout << endl;
+
+            if (choice2 == 1) {
+                createFile();
+            }
+            else if (choice2 == 2) {
+                createFolder();
+            }
+            else if (choice2 == 0) {
+                continue;
+            }
+            else
+            {
+                cout << "Incorrect choice" << endl;
+            }
+        }
+        else if (choice == 3)
+        {
+            cout << "What you want to delete?" << endl;
+            cout << "1 - File" << endl;
+            cout << "2 - Folder" << endl;
+
+            cout << "\n0 - Cancel" << endl;
+            cin >> choice2;
+            cout << endl;
+
+            if (choice2 == 1) {
+                deleteFile();
+            }
+            else if (choice2 == 2) {
+                deleteFolder();
+            }
+            else if (choice2 == 0) {
+                continue;
+            }
+            else
+            {
+                cout << "Incorrect choice" << endl;
+            }
+        }
+        else if (choice == 4)
+        {
+            cout << "What you want to rename?" << endl;
+            cout << "1 - File" << endl;
+            cout << "2 - Folder" << endl;
+
+
+            cout << "\n0 - Cancel" << endl;
+            cin >> choice2;
+            cout << endl;
+
+            if (choice2 == 1) {
+                renameFile();
+            }
+            else if (choice2 == 2) {
+                renameFolder();
+            }
+            else if (choice2 == 0) {
+                continue;
+            }
+            else
+            {
+                cout << "Incorrect choice" << endl;
+            }
+        }
+        else if (choice == 5)
+        {
+            cout << "What do you want to do" << endl;
+            cout << "1 - Copy" << endl;
+            cout << "2 - Move" << endl;
+            
+            cout << "0 - Cancel" << endl;
+
+            cin >> choice3;
+            cout << endl;
+
+            if(choice3 == 1) 
+            {
+                cout << "What you want to copy?" << endl;
+                cout << "1 - File" << endl;
+                cout << "2 - Folder" << endl;
+
+                cout << "\n0 - Cancel" << endl;
+                cin >> choice2;
+                cout << endl;
+
+                if (choice2 == 1) {
+                    copyFile();
+                }
+                else if (choice2 == 2) {
+                    copyFolder();
+                }
+                else if (choice2 == 0) {
+                    continue;
+                }
+                else
+                {
+                    cout << "Incorrect choice" << endl;
+                }
+            }
+            else if (choice3 == 2) {
+                cout << "What you want to move?" << endl;
+                cout << "1 - File" << endl;
+                cout << "2 - Folder" << endl;
+
+                cout << "\n0 - Cancel" << endl;
+                cin >> choice2;
+                cout << endl;
+
+                if (choice2 == 1) {
+                    moveFile();
+                }
+                else if (choice2 == 2) {
+                    moveFolder();
+                }
+                else if (choice2 == 0) {
+                    continue;
+                }
+                else
+                {
+                    cout << "Incorrect choice" << endl;
+                }
+            }
+            else if (choice == 0) {
+                continue;
+            }
+            else 
+            {
+                cout << "incorrect choice" << endl;
+            }
+        }
+        else if (choice == 6)
+        {
+            cout << "Size of what you want to calculate?" << endl;
+            cout << "1 - File" << endl;
+            cout << "2 - Folder" << endl;
+
+            cout << "\n0 - Cancel" << endl;
+            cin >> choice2;
+            cout << endl;
+
+            if (choice2 == 1) {
+                sizeOfFile();
+            }
+            else if (choice2 == 2) {
+                sizeOfFolder();
+            }
+            else if (choice2 == 0) {
+                continue;
+            }
+            else
+            {
+                cout << "Incorrect choice" << endl;
+            }
+        }
+        else if (choice == 7)
+        {
+            findByMask();
+        }
+    }
 }
