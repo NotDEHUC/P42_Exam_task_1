@@ -2,6 +2,8 @@
 #include <fstream>
 #include <io.h>
 #include <direct.h>
+#include <Windows.h>
+
 
 using namespace std;
 
@@ -67,20 +69,36 @@ char* getName(char* path, int& isTxt) {
 
 void menu() {
     cout << "Chouse an option: " << endl;
-    cout << "1 - Show disc content" << endl;
-    cout << "2 - Create folder/file" << endl;
-    cout << "3 - Delete folder/file" << endl;
-    cout << "4 - Rename folder/file" << endl;
-    cout << "5 - Copy/move folder/ file" << endl;
-    cout << "6 - Calculate folder/file size" << endl;
-    cout << "7 - Perform a mask search" << endl;
+    cout << "1 - Show disc content" << endl; //
+    cout << "2 - Create folder/file" << endl; //
+    cout << "3 - Delete folder/file" << endl; //
+    cout << "4 - Rename folder/file" << endl; //
+    cout << "5 - Copy/move folder/ file" << endl; // 0.5
+    cout << "6 - Calculate folder/file size" << endl; //
+    cout << "7 - Perform a mask search" << endl; //
     cout << endl;
     cout << "0 - Exit" << endl;
 }
 
 
 
-void lookDiskContent() {}
+void lookDiskContent(char* path) {
+    struct _finddata_t myfileinfo;
+    char s[250];
+    strcpy_s(s, 250, path);
+    if (path) {
+        strcat_s(s, 250, "\\");
+    }
+    strcat_s(s, 250, "*.*");
+    intptr_t done = _findfirst(s, &myfileinfo);
+
+    if (done != -1) {
+        do
+        {
+            cout << myfileinfo.attrib << " " << myfileinfo.name << endl;
+        } while (_findnext(done, &myfileinfo) != -1);
+    }
+}
 
 
 
@@ -447,7 +465,34 @@ void moveFile() {
 
 
 
-void sizeOfFolder() {}
+void sizeOfFolder(char* path, int& mysize) {
+    struct _finddata_t myfileinfo;
+    char s[250];
+
+    strcpy_s(s, 250, path);
+    if (path) {
+        strcat_s(s, 250, "\\");
+    }
+    strcat_s(s, 250, "*.*");
+    intptr_t done = _findfirst(s, &myfileinfo);
+
+    if (done != -1) {
+        do
+        {
+            if (myfileinfo.attrib & _A_SUBDIR && (strncmp(myfileinfo.name, "..", 1))) {
+                char path2[250];
+                strcpy_s(path2, 250, path);
+                strcat_s(path2, 250, "\\");
+                strcat_s(path2, 250, myfileinfo.name);
+                sizeOfFolder(path2, mysize);
+            }
+            else
+            {
+                mysize += myfileinfo.size;
+            }
+        } while (_findnext(done, &myfileinfo) != -1);
+    }
+}
 
 void sizeOfFile() {
     char* fileName = new char[200];
@@ -463,25 +508,47 @@ void sizeOfFile() {
 
 
 
-void findByMask() {
-    char* path = new char[200];
-
-    cout << "Enter the full path to the folder where you want to start searching: ";
-    cin >> path;
-
+void findByMask(char* path) {
     struct _finddata_t myfileinfo;
+    struct _finddata_t fileinfo;
+    char s[250];
+    char s2[250];
+    strcpy_s(s, 250, path);
+    if (path) {
+        strcat_s(s, 250, "\\");
+    }
+    strcpy_s(s2, 250, s);
+    strcat_s(s, 250, "*.*");
+    strcat_s(s2, 250, "*.cpp*");
+    intptr_t done = _findfirst(s, &myfileinfo);
+    intptr_t done2 = _findfirst(s2, &fileinfo);
 
-    long done = _findfirst(path, &myfileinfo);
+    while (done2 != -1)
+    {
+        cout << fileinfo.attrib << fileinfo.name << endl;
+        done2 = _findnext(done2, &fileinfo);
+    }
 
-    while (done != 1) {
-        cout << myfileinfo.name << endl;
-        done = _findnext(done, &myfileinfo);
+    if (done != -1) {
+        do
+        {
+            if (myfileinfo.attrib & _A_SUBDIR && (strncmp(myfileinfo.name, "..", 1))) {
+                char path2[250];
+                strcpy_s(path2, 250, path);
+                strcat_s(path2, 250, "\\");
+                strcat_s(path2, 250, myfileinfo.name);
+                findByMask(path2);
+            }
+        } while (_findnext(done, &myfileinfo) != -1);
     }
 }
 
 
 int main()
 {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
     int choice = 1;
     int choice2 = 1;
     int choice3 = 1;
@@ -496,7 +563,12 @@ int main()
         cout << endl;
 
         if (choice == 1) {
-            lookDiskContent();
+            cout << "Enter the disk: ";
+            char* path = new char[200];
+            cin >> path;
+            cout << endl;
+
+            lookDiskContent(path);
         }
         else if (choice == 2)
         {
@@ -651,7 +723,15 @@ int main()
                 sizeOfFile();
             }
             else if (choice2 == 2) {
-                sizeOfFolder();
+                int mysize = 0;
+
+                cout << "Enter the full path to the folder which size you want to calculate: ";
+                char* path = new char[200];
+                cin >> path;
+                cout << endl;
+
+                sizeOfFolder(path, mysize);
+                cout << "Size of this folder: " << mysize << "byte" << endl;
             }
             else if (choice2 == 0) {
                 continue;
@@ -663,7 +743,12 @@ int main()
         }
         else if (choice == 7)
         {
-            findByMask();
+            cout << "Enter the full path to the folder where you want to start searching: ";
+            char* path = new char[200];
+            cin >> path;
+            cout << endl;
+
+            findByMask(path);
         }
     }
 }
